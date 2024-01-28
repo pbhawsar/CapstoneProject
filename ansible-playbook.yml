@@ -1,0 +1,40 @@
+---
+- name: Manage Docker Container
+  hosts: docker
+  become: yes
+  
+  tasks:
+    - name: Print container name
+      debug:
+        msg: "Container Name: {{ container_name }}"
+
+    - name: Print image name
+      debug:
+        msg: "Image Name: {{ image_name }}"
+
+    - name: Stop the Docker container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: stopped
+
+    - name: Remove the Docker container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Pull the latest version of the image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        source: pull
+
+    - name: Start container with new image
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8081:8081"
+      register: container
+
+    - debug: var=container
